@@ -4,7 +4,7 @@
 BUILD_PHP_VERSIONS="7.0"
 
 for php_version in ${BUILD_PHP_VERSIONS}; do
-  IMAGE_FINAL_NAME=`echo "${DOCKER_REPO}:${php_version}-${CACHE_TAG}" | sed "s/-latest//g"`
+  IMAGE_FINAL_NAME=`echo "${DOCKER_REPO}:${php_version}-${CACHE_TAG}" | sed "s/${php_version}-latest/${php_version}/g"`
   echo "=> Building image ${IMAGE_FINAL_NAME} ..."
   docker build --build-arg php_version=${php_version} -f ${DOCKERFILE_PATH} -t ${IMAGE_FINAL_NAME} .
 done
