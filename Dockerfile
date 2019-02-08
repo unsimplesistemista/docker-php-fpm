@@ -12,6 +12,7 @@ RUN apt-get update && apt-get -y install \
     python-software-properties \
     software-properties-common \
     language-pack-en-base \
+    sudo \
     vim \
     supervisor \
     wget \
@@ -75,7 +76,7 @@ RUN if dpkg --compare-versions ${PHP_VERSION} lt 7.2; \
     fi
 
 # Install PHP composer
-RUN curl -sSL https://getcomposer.org/installer -o composer-setup.php && \
+RUN curl -sSLo composer-setup.php https://getcomposer.org/installer && \
         php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
         rm composer-setup.php
 
