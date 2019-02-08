@@ -2,6 +2,7 @@
 
 #BUILD_PHP_VERSIONS="7.0 7.1 7.2 7.3"
 BUILD_PHP_VERSIONS="7.2"
+LATEST_PHP_VERSION="7.2"
 
 for php_version in ${BUILD_PHP_VERSIONS}; do
   IMAGE_FINAL_NAME=`echo "${DOCKER_REPO}:${php_version}-${DOCKER_TAG}" | sed "s/-latest//g"`
@@ -9,3 +10,8 @@ for php_version in ${BUILD_PHP_VERSIONS}; do
   echo "=> Pushing image ${IMAGE_FINAL_NAME} ..."
   docker push ${IMAGE_FINAL_NAME}
 done
+
+if [ a"${DOCKER_TAG}" == "alatest" ]; then
+  echo "=> Pushing image ${IMAGE_NAME} ..."
+  docker push ${IMAGE_NAME}
+fi
