@@ -4,14 +4,14 @@
 BUILD_PHP_VERSIONS="7.2"
 LATEST_PHP_VERSION="7.2"
 
+if [ a"${DOCKER_TAG}" == "alatest" ]; then
+  echo "=> Building image ${IMAGE_NAME} ..."
+  docker build --build-arg php_version=${LATEST_PHP_VERSION} -f ${DOCKERFILE_PATH} -t ${IMAGE_NAME} .
+fi
+
 for php_version in ${BUILD_PHP_VERSIONS}; do
   IMAGE_FINAL_NAME=`echo "${DOCKER_REPO}:${php_version}-${DOCKER_TAG}" | sed "s/-latest//g"`
 
   echo "=> Building image ${IMAGE_FINAL_NAME} ..."
   docker build --build-arg php_version=${php_version} -f ${DOCKERFILE_PATH} -t ${IMAGE_FINAL_NAME} .
 done
-
-if [ a"${DOCKER_TAG}" == "alatest" ]; then
-  echo "=> Building image ${IMAGE_NAME} ..."
-  docker build --build-arg php_version=${LATEST_PHP_VERSION} -f ${DOCKERFILE_PATH} -t ${IMAGE_NAME} .
-fi
