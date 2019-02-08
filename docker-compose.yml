@@ -4,7 +4,7 @@ version: '3'
 services:
   php:
     restart: always
-    image: unsimplesistemista/docker-php-fpm:7.2
+    image: unsimplesistemista/docker-php-fpm
     ports:
       - 80:80
       - 443:443
@@ -13,8 +13,8 @@ services:
       #- /ssl/server.crt:/etc/nginx/ssl/server.crt:ro
       #- /ssl/server.key:/etc/nginx/ssl/server.key:ro
       # Web (documentRoot) directory is /var/www/public inside the container
-      - /var/www:/var/www/public
-      # Uncoment this for Symfony v3
+      - /var/www:/var/www
+      # Uncoment this volume for Symfony v3
       # - /var/www/web:/var/www/public
     logging:
       options:
