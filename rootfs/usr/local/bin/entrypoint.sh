@@ -2,6 +2,12 @@
 
 [ "$DEBUG" == "1" ] && set -x && set +e
 
+# Make it possible to execute preseed scripts
+for script in `find /usr/local/bin/preseed/ -type f | sort 2>/dev/null`; do
+  echo "=> Executing script ${script}"
+  ${script}
+done
+
 # Disable xdebug
 if [ ${PHP_XDEBUG_ENABLE} -ne 1 ]; then
   echo "=> Disabling xdebug ..."
