@@ -13,6 +13,7 @@ RUN apt-get update && apt-get -y install \
     software-properties-common \
     language-pack-en-base \
     sudo \
+    mysql-client \
     vim \
     supervisor \
     wget \
