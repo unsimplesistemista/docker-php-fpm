@@ -26,9 +26,9 @@ if [ ! -e /etc/nginx/ssl/server.crt -a ! -e /etc/nginx/ssl/server.key ]; then
   openssl req -newkey rsa:2048 -nodes -keyout /etc/nginx/ssl/server.key -x509 -days ${SSL_EXPIRATION_DAYS:-3650} -out /etc/nginx/ssl/server.crt -batch -subj "/C=${SSL_COUNTRY:-ES}/ST=${SSL_STATE:-CATALONIA}/O=${SSL_ORGANIZATION:-UNSIMPLESISTEMISTA.COM}/localityName=${SSL_LOCALITY:-BARCELONA}/commonName=${SSL_COMMON_NAME:-localhost}"
 fi
 
-if [ ! -e /etc/nginx/ssl/dhparams.pem ]; then
+if [ ! -e /etc/nginx/ssl/dhparam.pem ]; then
   echo "=> Generating DH parameters ..."
-  openssl dhparam -out /etc/nginx/ssl/dhparam.pem ${SSL_DHPARAM_BYTES:-2048}
+  openssl dhparam -dsaparam -out /etc/nginx/ssl/dhparam.pem ${SSL_DHPARAM_BYTES:-2048}
 fi
 
 # Fix SSL Certificate permissions
