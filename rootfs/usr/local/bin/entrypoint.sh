@@ -6,6 +6,10 @@
 for script in `find /usr/local/bin/preseed/ -type f | sort 2>/dev/null`; do
   echo "=> Executing script ${script}"
   ${script}
+  if [ $? -ne 0 ]; then
+    echo "=> Error executing script ${script} - Exiting ..."
+    exit 1
+  fi
 done
 
 # Disable xdebug
