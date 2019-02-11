@@ -49,7 +49,7 @@ find /etc/nginx/ssl -type f -exec chmod 600 {} \;
 for module in `find /etc/nginx/modules-available/ -type f -name "*.conf"`; do
   if [ ! -e /etc/nginx/modules-enabled/`basename ${module}` ]; then
     echo "=> Activating nginx module ${module} ... "
-    ln -s ${site} /etc/nginx/modules-enabled/
+    ln -s ${module} /etc/nginx/modules-enabled/
   fi
 done
 
