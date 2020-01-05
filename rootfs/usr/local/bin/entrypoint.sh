@@ -12,6 +12,13 @@ for script in `find /usr/local/bin/preseed/ -type f | sort 2>/dev/null`; do
   fi
 done
 
+# Reconfigure postfix 
+echo ${MAILNAME} > /etc/mailname
+echo "${RELAY_HOST} ${RELAY_USERNAME}:${RELAY_PASSWORD}" > /etc/postfix/sasl_passwd
+postmap hash:/etc/postfix/sasl_passwd
+chown root:root /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db
+chmod 0600 /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db
+
 # Disable xdebug
 if [ ${PHP_XDEBUG_ENABLE} -ne 1 ]; then
   echo "=> Disabling xdebug ..."
@@ -101,6 +108,10 @@ done
 find /var/run/ -name "*.pid" -type f -delete
 
 if echo $@ | wc -w | grep "^0$" >/dev/null; then
+  # Start postfix
+  postconf -e default_destination_rate_delay=${RATE_DELAY}
+  service postfix start
+
   exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf --nodaemon
 else
   export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

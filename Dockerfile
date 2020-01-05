@@ -16,10 +16,42 @@ RUN apt-get update && apt-get -y install \
     mysql-client \
     vim \
     supervisor \
+    rsyslog \
     wget \
     curl \
     imagemagick && \
     rm -rf /var/lib/apt/lists/*
+
+# Install postfix
+ENV RELAY_HOST=email-smtp.eu-west-1.amazonaws.com:587 \
+    RELAY_USERNAME=CHANGEME \
+    RELAY_PASSWORD=CHANGEME \
+    MY_NETWORKS="127.0.0.0/8" \
+    MAILNAME=changeme.com \
+    RATE_DELAY=1s 
+RUN apt-get update && \
+    echo postfix postfix/main_mailer_type string "'Internet Site'" | debconf-set-selections && \
+    echo postfix postfix/mynetworks string "${MY_NETWORKS}" | debconf-set-selections && \
+    echo postfix postfix/mailname string ${MAILNAME} | debconf-set-selections && \
+    apt-get --yes --force-yes install mailutils postfix && \
+    postconf -e mydestination="localhost.localdomain, localhost" && \
+    postconf -e smtpd_banner='$myhostname ESMTP $mail_name' && \
+    postconf -# myhostname && \
+    postconf -e inet_protocols=ipv4 && \
+    postconf -# smtp_fallback_relay && \
+    postconf -e relayhost=${RELAY_HOST} && \
+    postconf -e default_destination_rate_delay=${RATE_DELAY} && \
+    postconf -e smtp_sasl_auth_enable=yes && \
+    postconf -e smtp_sasl_security_options=noanonymous && \
+    postconf -e smtp_sasl_password_maps=hash:/etc/postfix/sasl_passwd && \
+    postconf -e smtp_use_tls=yes && \
+    postconf -e smtp_tls_security_level=encrypt && \
+    postconf -e smtp_tls_note_starttls_offer=yes && \
+    postconf -e 'smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt' && \
+    echo "${RELAY_HOST} ${RELAY_USERNAME}:${RELAY_PASSWORD}" > /etc/postfix/sasl_passwd && \
+    postmap hash:/etc/postfix/sasl_passwd && \
+    chown root:root /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db && \
+    chmod 0600 /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db
 
 # Install nginx
 RUN LANG=C.UTF-8 add-apt-repository -y ppa:ondrej/nginx-mainline && apt-get update && apt-get -y install \
@@ -116,6 +148,7 @@ ENV PHP_DISPLAY_ERRORS="Off" \
     PHP_XDEBUG_REMOTE_HOST="docker.for.mac.localhost" \
     PHP_XDEBUG_REMOTE_PORT="9000" \
     PHP_OPCACHE_ENABLE="1" \
+    PHP_OPCACHE_REVALIDATE_FREQ="2" \
     PHP_OPCACHE_VALIDATE_TIMESTAMPS="0" \
     PHP_OPCACHE_MAX_ACCELERATED_FILES="65407" \
     PHP_OPCACHE_MEMORY_CONSUMPTION="512"
