@@ -19,7 +19,8 @@ RUN apt-get update && apt-get -y install \
     rsyslog \
     wget \
     curl \
-    imagemagick && \
+    imagemagick \
+    unzip && \
     rm -rf /var/lib/apt/lists/*
 
 # Install postfix
@@ -64,6 +65,7 @@ RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php && apt-get update && apt
     php${PHP_VERSION} \
     php${PHP_VERSION}-apcu \
     php${PHP_VERSION}-apcu-bc \
+    php${PHP_VERSION}-amqp \
     php${PHP_VERSION}-bcmath \
     php${PHP_VERSION}-bz2 \
     php${PHP_VERSION}-cli \
@@ -111,7 +113,8 @@ RUN if dpkg --compare-versions ${PHP_VERSION} lt 7.2; \
 # Install PHP composer
 RUN curl -sSLo composer-setup.php https://getcomposer.org/installer && \
         php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
-        rm composer-setup.php
+        rm composer-setup.php && \
+        composer global require hirak/prestissimo
 
 # Install NewRelic
 RUN echo 'deb http://apt.newrelic.com/debian/ newrelic non-free' | tee /etc/apt/sources.list.d/newrelic.list && \
