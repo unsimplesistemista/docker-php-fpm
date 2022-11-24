@@ -79,7 +79,6 @@ RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php && apt-get update && apt
     php${PHP_VERSION}-imagick \
     php${PHP_VERSION}-imap \
     php${PHP_VERSION}-intl \
-    php${PHP_VERSION}-json \
     php${PHP_VERSION}-ldap \
     php${PHP_VERSION}-memcached \
     php${PHP_VERSION}-mbstring \
@@ -102,26 +101,31 @@ RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php && apt-get update && apt
     mkdir -p /run/php && \
     rm -rf /var/lib/apt/lists/*
 
+RUN if dpkg --compare-versions ${PHP_VERSION} lt 8.0; then \
+      apt-get update && \
+      apt-get -y install php${PHP_VERSION}-json && \
+      rm -rf /var/lib/apt/lists/*
+    fi
+
 # Install mcrypt
-RUN if dpkg --compare-versions ${PHP_VERSION} lt 7.2; \
-    then \
+RUN if dpkg --compare-versions ${PHP_VERSION} lt 7.2; then \
       apt-get update && \
       apt-get -y install php${PHP_VERSION}-mcrypt && \
       rm -rf /var/lib/apt/lists/* && \
-      phpenmod mcrypt; \
+      phpenmod mcrypt \
     fi
 
 # Install apcu-bc
 RUN if dpkg --compare-versions ${PHP_VERSION} ge 7.0; then \
       apt-get update && \
       apt-get -y install php${PHP_VERSION}-apcu-bc && \
-      rm -rf /var/lib/apt/lists/* ; \
+      rm -rf /var/lib/apt/lists/* \
     fi
 
 # Install PHP composer
 RUN curl -sSLo composer-setup.php https://getcomposer.org/installer && \
         php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
-        rm composer-setup.php 
+        rm -f composer-setup.php
 
 # Install NewRelic
 RUN echo 'deb http://apt.newrelic.com/debian/ newrelic non-free' | tee /etc/apt/sources.list.d/newrelic.list && \
