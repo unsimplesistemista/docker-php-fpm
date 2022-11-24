@@ -1,4 +1,6 @@
-FROM ubuntu:16.04
+ARG ARCH
+ARG ubuntu_version
+FROM ${ARCH}ubuntu:${ubuntu_version:-20.04}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -9,7 +11,6 @@ ENV PHP_VERSION="${php_version:-7.2}"
 
 # Install needed software
 RUN apt-get update && apt-get -y install \
-    python-software-properties \
     software-properties-common \
     language-pack-en-base \
     sudo \
@@ -63,8 +64,7 @@ RUN LANG=C.UTF-8 add-apt-repository -y ppa:ondrej/nginx-mainline && apt-get upda
 # Install PHP packages
 RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php && apt-get update && apt-get -y install \
     php${PHP_VERSION} \
-    php${PHP_VERSION}-apcu \
-    php${PHP_VERSION}-apcu-bc \
+    php${PHP_VERSION}-apcu --no-install-recommends \
     php${PHP_VERSION}-amqp \
     php${PHP_VERSION}-bcmath \
     php${PHP_VERSION}-bz2 \
@@ -99,6 +99,7 @@ RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php && apt-get update && apt
     php${PHP_VERSION}-xmlrpc \
     php${PHP_VERSION}-xsl \
     php${PHP_VERSION}-zip && \
+    mkdir -p /run/php && \
     rm -rf /var/lib/apt/lists/*
 
 # Install mcrypt
@@ -110,11 +111,18 @@ RUN if dpkg --compare-versions ${PHP_VERSION} lt 7.2; \
       phpenmod mcrypt; \
     fi
 
+# Install apcu-bc
+RUN if dpkg --compare-versions ${PHP_VERSION} ge 7.0; then \
+      apt-get update && \
+      apt-get -y install php${PHP_VERSION}-apcu-bc && \
+      rm -rf /var/lib/apt/lists/* ; \
+    fi
+
 # Install PHP composer
 RUN curl -sSLo composer-setup.php https://getcomposer.org/installer && \
         php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
-        rm composer-setup.php && \
-        composer global require hirak/prestissimo
+        rm composer-setup.php 
+#        composer global require hirak/prestissimo
 
 # Install NewRelic
 RUN echo 'deb http://apt.newrelic.com/debian/ newrelic non-free' | tee /etc/apt/sources.list.d/newrelic.list && \
@@ -143,6 +151,9 @@ ENV USER="${user}" \
 ENV PHP_DISPLAY_ERRORS="Off" \
     PHP_DEFAULT_CHARSET="ISO-8859-1" \
     PHP_MAX_EXECUTION_TIME="600s" \
+    PHP_MAX_INPUT_VARS="10000" \
+    PHP_MAX_INPUT_TIME="600" \
+    PHP_MAX_POST_TIME="600" \
     PHP_MEMORY_LIMIT="1024M" \
     PHP_POST_MAX_SIZE="16M" \
     PHP_UPLOAD_MAX_FILESIZE="50M" \
@@ -168,10 +179,25 @@ ENV FPM_PROCESS_CONTROL_TIMEOUT="${PHP_MAX_EXECUTION_TIME}" \
 ENV NEWRELIC_LICENSE="" \
     NEWRELIC_APPNAME="PHP Application"
 
+# Install ioncube
+ENV IONCUBE_LOADER_URL="http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz"
+#RUN /usr/local/bin/install-ioncube.sh
+RUN mkdir -p  /tmp/ioncube && \
+    curl -sSL -o /tmp/ioncube/ioncube.tar.gz ${IONCUBE_LOADER_URL} && \
+    cd /tmp/ioncube && \
+    tar zxvf ioncube.tar.gz && \
+    php_extension_dir=`php -i | grep "^extension_dir" | awk '{print $NF}'` && \
+    php_ini_dir=`php -i | grep 'additional .ini files' | awk '{print $NF}'` && \
+    cp /tmp/ioncube/ioncube/ioncube_loader_lin_${PHP_VERSION}.so ${php_extension_dir} && \
+    echo "zend_extension = ${php_extension_dir}/ioncube_loader_lin_${PHP_VERSION}.so" >> /etc/php/${PHP_VERSION}/fpm/conf.d/00-ioncube.ini && \
+    echo "zend_extension = ${php_extension_dir}/ioncube_loader_lin_${PHP_VERSION}.so" >> /etc/php/${PHP_VERSION}/cli/conf.d/00-ioncube.ini && \
+    rm -rf /tmp/ioncube
+
 RUN mkdir -p \
     /etc/nginx/ssl \
     /var/log/supervisor \
-    /var/log/newrelic
+    /var/log/newrelic && \
+    rm -f /etc/localtime
 
 ADD ./rootfs /
 RUN chmod +x /usr/local/bin/*.sh && \
