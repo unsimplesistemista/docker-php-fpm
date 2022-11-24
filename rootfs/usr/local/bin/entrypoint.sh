@@ -19,6 +19,20 @@ postmap hash:/etc/postfix/sasl_passwd
 chown root:root /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db
 chmod 0600 /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db
 
+# Blocked destination domains
+for ignored_domain in `echo ${RELAY_IGNORE_DOMAINS} | sed "s/,/ /g"`; do
+  if [ ! -e /etc/postfix/transport_maps ]; then
+    echo "=> Ignoring destination domain ${ignored_domain} ..."
+    echo "${ignored_domain} discard:" >> /etc/postfix/transport_maps
+  fi
+done
+if [ a"${RELAY_IGNORE_DOMAINS}" != "a" ]; then
+  postmap /etc/postfix/transport_maps
+  if ! grep transport_maps = hash:/etc/postfix/transport_maps >/dev/null; then
+    echo "transport_maps = hash:/etc/postfix/transport_maps" >> /etc/postfix/main.cf
+  fi
+fi
+
 # Disable xdebug
 if [ ${PHP_XDEBUG_ENABLE} -ne 1 ]; then
   echo "=> Disabling xdebug ..."
@@ -78,6 +92,7 @@ perl -p -i -e "s/keepalive_timeout .*;/keepalive_timeout ${NGINX_KEEPALIVE_TIMEO
 
 # Update PHP-FPM Process Manager settings
 #perl -i -p -e "s/^;?process_control_timeout ?=.*/process_control_timeout = ${PHP_PROCESS_CONTROL_TIMEOUT}/g" ${PHP_FPM_CFG_FILE}
+perl -p -i -e "s/^pm ?=.*/pm = ${FPM_PM}/g" ${PHP_FPM_POOL_CFG_FILE}
 case `echo ${FPM_PM} | tr '[:upper:]' '[:lower:]'` in
   dynamic)
     perl -p -i -e "s/^;?pm.process_idle_timeout ?=/;pm.process_idle_timeout =/g" ${PHP_FPM_POOL_CFG_FILE}
