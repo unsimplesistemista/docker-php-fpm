@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -9,7 +9,6 @@ ENV PHP_VERSION="${php_version:-7.2}"
 
 # Install needed software
 RUN apt-get update && apt-get -y install \
-    python-software-properties \
     software-properties-common \
     language-pack-en-base \
     sudo \
@@ -63,8 +62,6 @@ RUN LANG=C.UTF-8 add-apt-repository -y ppa:ondrej/nginx-mainline && apt-get upda
 # Install PHP packages
 RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php && apt-get update && apt-get -y install \
     php${PHP_VERSION} \
-    php${PHP_VERSION}-apcu \
-    php${PHP_VERSION}-apcu-bc \
     php${PHP_VERSION}-amqp \
     php${PHP_VERSION}-bcmath \
     php${PHP_VERSION}-bz2 \
@@ -79,7 +76,6 @@ RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php && apt-get update && apt
     php${PHP_VERSION}-imagick \
     php${PHP_VERSION}-imap \
     php${PHP_VERSION}-intl \
-    php${PHP_VERSION}-json \
     php${PHP_VERSION}-ldap \
     php${PHP_VERSION}-memcached \
     php${PHP_VERSION}-mbstring \
@@ -101,6 +97,8 @@ RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php && apt-get update && apt
     php${PHP_VERSION}-zip && \
     rm -rf /var/lib/apt/lists/*
 
+RUN if [ $(echo "$PHP_VERSION" | cut -c -1) -lt 8 ]; then apt-get -y install php${PHP_VERSION}-json && rm -rf /var/lib/apt/lists/* ; fi
+
 # Install mcrypt
 RUN if dpkg --compare-versions ${PHP_VERSION} lt 7.2; \
     then \
@@ -113,8 +111,7 @@ RUN if dpkg --compare-versions ${PHP_VERSION} lt 7.2; \
 # Install PHP composer
 RUN curl -sSLo composer-setup.php https://getcomposer.org/installer && \
         php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
-        rm composer-setup.php && \
-        composer global require hirak/prestissimo
+        rm composer-setup.php
 
 # Install NewRelic
 RUN echo 'deb http://apt.newrelic.com/debian/ newrelic non-free' | tee /etc/apt/sources.list.d/newrelic.list && \
