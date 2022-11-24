@@ -104,7 +104,7 @@ RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php && apt-get update && apt
 RUN if dpkg --compare-versions ${PHP_VERSION} lt 8.0; then \
       apt-get update && \
       apt-get -y install php${PHP_VERSION}-json && \
-      rm -rf /var/lib/apt/lists/*
+      rm -rf /var/lib/apt/lists/* \
     fi
 
 # Install mcrypt
