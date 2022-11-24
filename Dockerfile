@@ -122,7 +122,6 @@ RUN if dpkg --compare-versions ${PHP_VERSION} ge 7.0; then \
 RUN curl -sSLo composer-setup.php https://getcomposer.org/installer && \
         php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
         rm composer-setup.php 
-#        composer global require hirak/prestissimo
 
 # Install NewRelic
 RUN echo 'deb http://apt.newrelic.com/debian/ newrelic non-free' | tee /etc/apt/sources.list.d/newrelic.list && \
