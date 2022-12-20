@@ -37,6 +37,9 @@ fi
 if [ ${PHP_XDEBUG_ENABLE} -ne 1 ]; then
   echo "=> Disabling xdebug ..."
   phpdismod xdebug
+  export PHP_XDEBUG_MODE=off
+else
+  export PHP_XDEBUG_MODE=debug
 fi
 
 # Disable opcache
