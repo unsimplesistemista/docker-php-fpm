@@ -101,10 +101,11 @@ RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php && apt-get update && apt
     mkdir -p /run/php && \
     rm -rf /var/lib/apt/lists/*
 
+# Install json
 RUN if dpkg --compare-versions ${PHP_VERSION} lt 8.0; then \
       apt-get update && \
       apt-get -y install php${PHP_VERSION}-json && \
-      rm -rf /var/lib/apt/lists/* \
+      rm -rf /var/lib/apt/lists/*; \
     fi
 
 # Install mcrypt
@@ -112,14 +113,14 @@ RUN if dpkg --compare-versions ${PHP_VERSION} lt 7.2; then \
       apt-get update && \
       apt-get -y install php${PHP_VERSION}-mcrypt && \
       rm -rf /var/lib/apt/lists/* && \
-      phpenmod mcrypt \
+      phpenmod mcrypt; \
     fi
 
 # Install apcu-bc
-RUN if dpkg --compare-versions ${PHP_VERSION} ge 7.0; then \
+RUN if dpkg --compare-versions ${PHP_VERSION} ge 7.0 -a dpkg --compare-versions ${PHP_VERSION} lt 8.0 ; then \
       apt-get update && \
       apt-get -y install php${PHP_VERSION}-apcu-bc && \
-      rm -rf /var/lib/apt/lists/* \
+      rm -rf /var/lib/apt/lists/*; \
     fi
 
 # Install PHP composer
