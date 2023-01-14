@@ -1,6 +1,6 @@
 ARG ARCH
 ARG ubuntu_version
-FROM ${ARCH}ubuntu:${ubuntu_version:-20.04}
+FROM ${ARCH:-amd64}/ubuntu:${ubuntu_version:-20.04}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
