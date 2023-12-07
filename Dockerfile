@@ -11,6 +11,7 @@ ENV PHP_VERSION="${php_version:-7.2}"
 
 # Install needed software
 RUN apt-get update && apt-get -y install \
+    apt-transport-https \
     software-properties-common \
     language-pack-en-base \
     sudo \
