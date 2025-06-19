@@ -1,6 +1,6 @@
 ARG ARCH
 ARG ubuntu_version
-FROM ${ARCH:-amd64}/ubuntu:${ubuntu_version:-20.04}
+FROM ubuntu:${ubuntu_version:-20.04}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -57,7 +57,7 @@ RUN apt-get update && \
     chmod 0600 /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db
 
 # Install nginx
-RUN LANG=C.UTF-8 add-apt-repository -y ppa:ondrej/nginx-mainline && apt-get update && apt-get -y install \
+RUN LANG=C.UTF-8 add-apt-repository -y ppa:ondrej/nginx && apt-get update && apt-get -y install \
     nginx \
     nginx-extras && \
     rm -rf /var/lib/apt/lists/*
@@ -130,11 +130,13 @@ RUN curl -sSLo composer-setup.php https://getcomposer.org/installer && \
         rm -f composer-setup.php
 
 # Install NewRelic
-RUN echo 'deb http://apt.newrelic.com/debian/ newrelic non-free' | tee /etc/apt/sources.list.d/newrelic.list && \
-    wget -O- https://download.newrelic.com/548C16BF.gpg | apt-key add - && \
-    apt-get update && apt-get -y install newrelic-php5 && \
-    rm -rf /var/lib/apt/lists/* && \
-    phpdismod newrelic
+RUN if uname -m | grep "^x86"; then \
+  echo 'deb [signed-by=/usr/share/keyrings/download.newrelic.com-newrelic.gpg] http://apt.newrelic.com/debian/ newrelic non-free' | sudo tee /etc/apt/sources.list.d/newrelic.list && \
+  wget -O- https://download.newrelic.com/548C16BF.gpg | sudo gpg --dearmor -o /usr/share/keyrings/download.newrelic.com-newrelic.gpg && \
+  apt-get update && apt-get -y install newrelic-php5 && \
+  rm -rf /var/lib/apt/lists/* && \
+  phpdismod newrelic; \
+fi
 
 # Disable nginx default sites
 RUN rm /etc/nginx/sites-enabled/* \
