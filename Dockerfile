@@ -1,6 +1,6 @@
 ARG ARCH
 ARG ubuntu_version
-FROM ubuntu:${ubuntu_version:-20.04}
+FROM ubuntu:${ubuntu_version:-22.04}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
