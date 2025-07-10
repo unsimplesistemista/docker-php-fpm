@@ -9,6 +9,16 @@ ARG php_version
 
 ENV PHP_VERSION="${php_version:-7.2}"
 
+# Fix GPG keys in apt...
+RUN apt-get update && apt-get -y install \
+    slugify \
+    gpg
+ENV KEYS="871920D1991BC93C 4F4EA0AAE5267A6C B31B29E5548C16BF 32FA4C172DAD550E 71DAEAAB4AD4CAB6"
+RUN for id in $KEYS; do \
+      name=$(gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys $id 2>&1 | grep -Eo '"[^"]+"' | xargs slugify); \
+      gpg --export $id | tee /etc/apt/trusted.gpg.d/$name.gpg > /dev/null; \
+    done
+
 # Install needed software
 RUN apt-get update && apt-get -y install \
     apt-transport-https \
