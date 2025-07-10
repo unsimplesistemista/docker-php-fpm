@@ -11,7 +11,7 @@ ENV PHP_VERSION="${php_version:-7.2}"
 
 # Fix GPG keys in apt...
 #RUN apt-get update && apt-get -y install \
-RUN apt-get -y install \
+RUN apt-get --fix-broken -y install \
     slugify \
     gpg
 ENV KEYS="871920D1991BC93C 4F4EA0AAE5267A6C B31B29E5548C16BF 32FA4C172DAD550E 71DAEAAB4AD4CAB6"
