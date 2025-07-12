@@ -9,17 +9,6 @@ ARG php_version
 
 ENV PHP_VERSION="${php_version:-7.2}"
 
-# Fix GPG keys in apt...
-#RUN apt-get update && apt-get -y install \
-RUN apt-get --fix-broken -y install \
-    slugify \
-    gpg
-ENV KEYS="871920D1991BC93C 4F4EA0AAE5267A6C B31B29E5548C16BF 32FA4C172DAD550E 71DAEAAB4AD4CAB6"
-RUN for id in $KEYS; do \
-      name=$(gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys $id 2>&1 | grep -Eo '"[^"]+"' | xargs slugify); \
-      gpg --export $id | tee /etc/apt/trusted.gpg.d/$name.gpg > /dev/null; \
-    done
-
 # Install needed software
 RUN apt-get update && apt-get -y install \
     apt-transport-https \
@@ -210,6 +199,19 @@ RUN mkdir -p  /tmp/ioncube && \
     echo "zend_extension = ${php_extension_dir}/ioncube_loader_lin_${PHP_VERSION}.so" >> /etc/php/${PHP_VERSION}/fpm/conf.d/00-ioncube.ini && \
     echo "zend_extension = ${php_extension_dir}/ioncube_loader_lin_${PHP_VERSION}.so" >> /etc/php/${PHP_VERSION}/cli/conf.d/00-ioncube.ini && \
     rm -rf /tmp/ioncube
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y \
+        ca-certificates \
+        xfonts-75dpi \
+        xfonts-base \
+        fontconfig \
+        redis-tools \
+    && wget -c "https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.$(lsb_release -c -s)_amd64.deb" -O wkhtmltopdf.deb \
+    && dpkg -i wkhtmltopdf.deb \
+    && fc-cache -f -v \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p \
     /etc/nginx/ssl \
