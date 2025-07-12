@@ -200,19 +200,6 @@ RUN mkdir -p  /tmp/ioncube && \
     echo "zend_extension = ${php_extension_dir}/ioncube_loader_lin_${PHP_VERSION}.so" >> /etc/php/${PHP_VERSION}/cli/conf.d/00-ioncube.ini && \
     rm -rf /tmp/ioncube
 
-RUN apt-get update && \
-    apt-get install --no-install-recommends -y \
-        ca-certificates \
-        xfonts-75dpi \
-        xfonts-base \
-        fontconfig \
-        redis-tools \
-    && wget -c "https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.$(lsb_release -c -s)_amd64.deb" -O wkhtmltopdf.deb \
-    && dpkg -i wkhtmltopdf.deb \
-    && fc-cache -f -v \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
-
 RUN mkdir -p \
     /etc/nginx/ssl \
     /var/log/supervisor \
