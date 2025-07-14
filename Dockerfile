@@ -131,7 +131,7 @@ RUN curl -sSLo composer-setup.php https://getcomposer.org/installer && \
 
 # Install NewRelic
 RUN if uname -m | grep "^x86"; then \
-  echo 'echo 'deb [signed-by=/usr/share/keyrings/download.newrelic.com-newrelic.gpg] http://apt.newrelic.com/debian/ newrelic non-free' | sudo tee /etc/apt/sources.list.d/newrelic.list && \
+  echo 'deb [signed-by=/usr/share/keyrings/download.newrelic.com-newrelic.gpg] http://apt.newrelic.com/debian/ newrelic non-free' | sudo tee /etc/apt/sources.list.d/newrelic.list && \
   wget -O- https://download.newrelic.com/NEWRELIC_APT_2DAD550E.public | sudo gpg --import --batch --no-default-keyring --keyring /usr/share/keyrings/download.newrelic.com-newrelic.gpg && \
   apt-get update && apt-get -y install newrelic-php5 && \
   rm -rf /var/lib/apt/lists/* && \
