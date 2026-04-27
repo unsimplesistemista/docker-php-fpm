@@ -22,7 +22,11 @@ RUN apt-get update && apt-get -y install \
     wget \
     curl \
     imagemagick \
-    unzip && \
+    unzip \
+    gnupg2 \
+    ca-certificates \ 
+    lsb-release \
+    ubuntu-keyring && \
     rm -rf /var/lib/apt/lists/*
 
 # Install postfix
@@ -57,7 +61,13 @@ RUN apt-get update && \
     chmod 0600 /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db
 
 # Install nginx
-RUN LANG=C.UTF-8 add-apt-repository -y ppa:ondrej/nginx && apt-get update && apt-get -y install \
+RUN LC_ALL=C.UTF-8 curl https://nginx.org/keys/nginx_signing.key | \
+    gpg —dearmor | \
+    tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg]http://nginx.org/packages/ubuntu lsb_release -cs nginx" | \
+    tee /etc/apt/sources.list.d/nginx.list && \
+    echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n”| sudo tee /etc/apt/preferences.d/99nginx" && \
+    apt-get update && apt-get -y install \
     nginx \
     nginx-extras && \
     rm -rf /var/lib/apt/lists/*
