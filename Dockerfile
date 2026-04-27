@@ -67,8 +67,8 @@ RUN LC_ALL=C.UTF-8 curl https://nginx.org/keys/nginx_signing.key | \
     tee /etc/apt/sources.list.d/nginx.list && \
     echo "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n"| tee /etc/apt/preferences.d/99nginx && \
     apt-get update && apt-get -y install \
-    nginx \
-    nginx-extras && \
+    nginx && \
+    #nginx-extras && \
     rm -rf /var/lib/apt/lists/*
 
 # Install PHP packages
