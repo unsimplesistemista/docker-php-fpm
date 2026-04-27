@@ -14,7 +14,6 @@ RUN apt-get update && apt-get -y install \
     apt-transport-https \
     software-properties-common \
     language-pack-en-base \
-    sudo \
     mysql-client \
     vim \
     supervisor \
@@ -66,7 +65,7 @@ RUN LC_ALL=C.UTF-8 curl https://nginx.org/keys/nginx_signing.key | \
     tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
     echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg]http://nginx.org/packages/ubuntu lsb_release -cs nginx" | \
     tee /etc/apt/sources.list.d/nginx.list && \
-    echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n”| sudo tee /etc/apt/preferences.d/99nginx" && \
+    echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n"| tee /etc/apt/preferences.d/99nginx" && \
     apt-get update && apt-get -y install \
     nginx \
     nginx-extras && \
@@ -141,8 +140,8 @@ RUN curl -sSLo composer-setup.php https://getcomposer.org/installer && \
 
 # Install NewRelic
 RUN if uname -m | grep "^x86"; then \
-  echo 'deb [signed-by=/usr/share/keyrings/download.newrelic.com-newrelic.gpg] http://apt.newrelic.com/debian/ newrelic non-free' | sudo tee /etc/apt/sources.list.d/newrelic.list && \
-  wget -O- https://download.newrelic.com/NEWRELIC_APT_2DAD550E.public | sudo gpg --import --batch --no-default-keyring --keyring /usr/share/keyrings/download.newrelic.com-newrelic.gpg && \
+  echo 'deb [signed-by=/usr/share/keyrings/download.newrelic.com-newrelic.gpg] http://apt.newrelic.com/debian/ newrelic non-free' | tee /etc/apt/sources.list.d/newrelic.list && \
+  wget -O- https://download.newrelic.com/NEWRELIC_APT_2DAD550E.public | gpg --import --batch --no-default-keyring --keyring /usr/share/keyrings/download.newrelic.com-newrelic.gpg && \
   apt-get update && apt-get -y install newrelic-php5 && \
   rm -rf /var/lib/apt/lists/* && \
   phpdismod newrelic; \
