@@ -148,6 +148,7 @@ RUN if uname -m | grep "^x86"; then \
 fi
 
 # Disable nginx default sites
+RUN find /etc/nginx
 RUN rm /etc/nginx/sites-enabled/* \
     /etc/nginx/sites-available/*
 
